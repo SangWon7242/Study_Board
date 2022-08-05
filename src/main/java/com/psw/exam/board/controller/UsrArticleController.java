@@ -100,10 +100,14 @@ public class UsrArticleController {
   }
 
   public void actionList(Rq rq) {
+    int page = rq.getIntParam("page", 1);
+    int pageItemsCount = 10;
     String searchKeyword = rq.getParam("searchKeyword", "");
     String searchKeywordTypeCode = rq.getParam("searchKeywordTypeCode", "");
     int boardId = rq.getIntParam("boardId", 0);
     String orderBy = rq.getParam("orderBy", "idDesc");
+
+
     Board board = null;
 
     if (boardId != 0) {
@@ -115,7 +119,7 @@ public class UsrArticleController {
       return;
     }
 
-    List<Article> articles = articleService.getArticles(boardId, searchKeywordTypeCode, searchKeyword, orderBy);
+    List<Article> articles = articleService.getArticles(boardId, searchKeywordTypeCode, searchKeyword, orderBy, page, pageItemsCount);
 
     String boardName = board == null ? "전체" : board.getName();
 

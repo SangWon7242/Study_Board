@@ -26,10 +26,10 @@ public class ArticleRepository {
     return id;
   }
 
-  public List<Article> getArticles(int boardId, String searchKeywordTypeCode, String searchKeyword, String orderBy) {
-    if (boardId == 0 && searchKeyword.length() == 0) { // 둘다 0이면 기존 articles를 반환
-      return articles;
-    }
+  public List<Article> getArticles(int boardId, String searchKeywordTypeCode, String searchKeyword, String orderBy, int limitStart, int limitCount) {
+//    if (boardId == 0 && searchKeyword.length() == 0) { // 둘다 0이면 기존 articles를 반환
+//      return articles;
+//    }
 
     List<Article> filteredArticles = new ArrayList<>();
 
@@ -45,12 +45,32 @@ public class ArticleRepository {
       }
     }
 
-    for (Article article : articles) {
+    int dataIndex = 0;
+
+    List<Article> sortedArticles = articles;
+
+    boolean orderByIdDesc = orderBy.equals("idDesc");
+
+    if (orderByIdDesc) {
+      sortedArticles = Util.reverseList(sortedArticles);
+    }
+
+    for (Article article : sortedArticles) {
 
       if (boardId != 0) { // boardId가 0이 아니라는 건 치뤄야 할 시험이 더 있다는 뜻
         if (article.getBoardId() != boardId) { // 여기까지 다르다는 것은 실패 했다는 뜻
           continue;
         }
+      }
+
+      if (dataIndex >= limitStart) {
+        filteredArticles.add(article);
+      }
+
+      dataIndex++;
+
+      if(filteredArticles.size() == limitCount) {
+        break;
       }
 
       if (searchKeyword.length() > 0) { // 아직 살아 있고 이거까지 있다는 건
