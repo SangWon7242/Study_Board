@@ -45,7 +45,13 @@ public class Rq {
       return defaultValue;
     }
 
-    return params.get(paramsName);
+    try {
+      return params.get(paramsName);
+    }
+    catch ( NumberFormatException e) {
+      return defaultValue;
+    }
+
   }
 
   public String getUrlPath() {

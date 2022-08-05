@@ -26,32 +26,71 @@ public class ArticleRepository {
     return id;
   }
 
-  public List<Article> getArticles(int boardId) {
-    if ( boardId == 0 ) {
+  public List<Article> getArticles(int boardId, String searchKeywordTypeCode, String searchKeyword, String orderBy) {
+    if (boardId == 0 && searchKeyword.length() == 0) { // 둘다 0이면 기존 articles를 반환
       return articles;
     }
 
-    List<Article> filteredArticles  = new ArrayList<>();
+    List<Article> filteredArticles = new ArrayList<>();
 
-    for(Article article : articles) {
-      if (article.getBoardId() == boardId){
-        filteredArticles.add(article);
+    if (searchKeyword.length() > 0 ) {
+      filteredArticles = new ArrayList<>();
+
+      for (Article article : articles) {
+        boolean matched = article.getTitle().contains(searchKeyword) || article.getBody().contains(searchKeyword);
+
+        if (matched) {
+          filteredArticles.add(article);
+        }
       }
     }
 
-    return articles;
+    for (Article article : articles) {
+
+      if (boardId != 0) { // boardId가 0이 아니라는 건 치뤄야 할 시험이 더 있다는 뜻
+        if (article.getBoardId() != boardId) { // 여기까지 다르다는 것은 실패 했다는 뜻
+          continue;
+        }
+      }
+
+      if (searchKeyword.length() > 0) { // 아직 살아 있고 이거까지 있다는 건
+        switch (searchKeywordTypeCode) {
+          case "body":
+            if (!article.getBody().contains(searchKeyword)) { // 거짓이라는 건 존재하지 않는 다는 뜻
+              continue;
+            }
+            break;
+          case "title,body":
+            if (!article.getTitle().contains(searchKeyword) && !article.getBody().contains(searchKeyword)) {
+              // 이 키워드는 title에도 찾아봐도 없고 body에도 찾았을 때 없는 경우
+              // !false && !false => true && true -> 이 경우에는 false를 반환
+              // !true && !false => false && true -> 이 경우는 계속 true
+              continue;
+            }
+            break;
+          case "title":
+            if (!article.getTitle().contains(searchKeyword)) {
+              continue;
+            }
+          default:
+            break;
+        }
+      }
+    }
+
+    return filteredArticles;
   }
 
   public void deleteArticleById(int id) {
     Article article = getArticleById(id);
 
-    if ( article != null ){
+    if (article != null) {
       articles.remove(article);
     }
   }
 
   public Article getArticleById(int id) {
-    for(Article article : articles) {
+    for (Article article : articles) {
       if (article.getId() == id) {
         return article;
       }
